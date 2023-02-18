@@ -1,0 +1,113 @@
+receivers:
+    otlp:
+        protocols:
+            grpc:
+                endpoint: localhost:9312
+            http:
+                endpoint: localhost:9313
+    hostmetrics:
+        collection_interval: 5s
+        scrapers:
+            cpu: {}
+            load: {}
+            memory: {}
+            paging: {}
+            disk: {}
+            filesystem: {}
+            network: {}
+            processes: {}
+            process: {}
+    docker_stats:
+        endpoint: unix:///var/run/docker.sock
+        collection_interval: 5s
+        timeout: 20s
+        api_version: 1.24
+    prometheus:
+        config:
+            scrape_configs:
+                - job_name: otel-collector
+                  scrape_interval: 5s
+                  static_configs:
+                    - targets:
+                        - 0.0.0.0:8888
+    filelog:
+        include:
+            - /var/log/**/*.log*
+    fluentforward:
+        endpoint: 0.0.0.0:8006
+processors:
+    resource/common:
+        attributes:
+            - key: common-key
+              action: insert
+              value: common-value
+    resource/metrics:
+        attributes:
+            - key: metric-key
+              action: insert
+              value: metric-value
+    resource/traces:
+        attributes:
+            - key: trace-key
+              action: insert
+              value: trace-value
+    resource/logs:
+        attributes:
+            - key: log-key
+              action: insert
+              value: log-value
+    resourcedetection:
+        detectors:
+            - env
+            - system
+            - docker
+        timeout: 5s
+        override: false
+exporters:
+    logging:
+        verbosity: detailed
+    otlp/2:
+        tls:
+            insecure: true
+        endpoint: localhost:9314
+        headers:
+            authorization: 'auth-header'
+        sending_queue:
+            enabled: true
+            num_consumers: 100
+            queue_size: 10000
+service:
+    pipelines:
+        metrics:
+            receivers:
+                - hostmetrics
+                # - prometheus
+            processors:
+                - resourcedetection
+                - resource/common
+                - resource/metrics
+            exporters:
+                - otlp/2
+        logs:
+            receivers:
+                - otlp
+                - fluentforward
+                - filelog
+            processors:
+                - resourcedetection
+                - resource/common
+                - resource/traces
+            exporters:
+                - otlp/2
+        traces:
+            receivers:
+                - otlp
+            processors:
+                - resourcedetection
+                - resource/common
+                - resource/logs
+            exporters:
+                - otlp/2
+    telemetry:
+        logs:
+            level: error

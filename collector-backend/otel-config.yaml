@@ -1,0 +1,87 @@
+receivers:
+    otlp:
+        protocols:
+            grpc:
+                endpoint: localhost:9314
+            http:
+                endpoint: localhost:9315
+    # prometheus:
+    #     config:
+    #         scrape_configs:
+    #             - job_name: otel-collector
+    #               scrape_interval: 5s
+    #               static_configs:
+    #                 - targets:
+    #                     - 0.0.0.0:9999
+    filelog:
+        include:
+            - /var/log/**/*.log*
+    # fluentforward:
+    #     endpoint: 0.0.0.0:8006
+processors:
+    resource/common:
+        attributes:
+            - key: common-key
+              action: insert
+              value: common-value
+    resource/metrics:
+        attributes:
+            - key: metric-key
+              action: insert
+              value: metric-value
+    resource/traces:
+        attributes:
+            - key: trace-key
+              action: insert
+              value: trace-value
+    resource/logs:
+        attributes:
+            - key: log-key
+              action: insert
+              value: log-value
+    resourcedetection:
+        detectors:
+            - env
+            - system
+            - docker
+        timeout: 5s
+        override: false
+exporters:
+    logging:
+        loglevel: debug
+service:
+    pipelines:
+        metrics:
+            receivers:
+                - otlp
+            processors:
+                - resourcedetection
+                - resource/common
+                - resource/metrics
+            exporters:
+                - logging
+        logs:
+            receivers:
+                - otlp
+                # - fluentforward
+                # - filelog
+            processors:
+                - resourcedetection
+                - resource/common
+                - resource/traces
+            exporters:
+                - logging
+        traces:
+            receivers:
+                - otlp
+            processors:
+                - resourcedetection
+                - resource/common
+                - resource/logs
+            exporters:
+                - logging
+    telemetry:
+        logs:
+            level: debug
+        metrics:
+            address: 0.0.0.0:8889
