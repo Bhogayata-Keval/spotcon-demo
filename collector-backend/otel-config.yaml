@@ -54,10 +54,6 @@ service:
         metrics:
             receivers:
                 - otlp
-            processors:
-                - resourcedetection
-                - resource/common
-                - resource/metrics
             exporters:
                 - logging
         logs:
@@ -65,19 +61,11 @@ service:
                 - otlp
                 # - fluentforward
                 # - filelog
-            processors:
-                - resourcedetection
-                - resource/common
-                - resource/traces
             exporters:
                 - logging
         traces:
             receivers:
                 - otlp
-            processors:
-                - resourcedetection
-                - resource/common
-                - resource/logs
             exporters:
                 - logging
     telemetry:

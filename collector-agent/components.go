@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/filterprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourcedetectionprocessor"
@@ -28,6 +29,7 @@ func Components() (component.Factories, error) {
 	factories := component.Factories{}
 	factories.Extensions, err = extension.MakeFactoryMap(
 		healthcheckextension.NewFactory(),
+		pprofextension.NewFactory(),
 	// frontend.NewAuthFactory(),
 	)
 	if err != nil {

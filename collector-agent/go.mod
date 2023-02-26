@@ -16,6 +16,7 @@ require (
 
 require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension v0.68.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension v0.68.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor v0.68.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/filterprocessor v0.68.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourcedetectionprocessor v0.68.0

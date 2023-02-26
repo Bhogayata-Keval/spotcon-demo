@@ -9,14 +9,14 @@ receivers:
         collection_interval: 5s
         scrapers:
             cpu: {}
-            load: {}
-            memory: {}
-            paging: {}
-            disk: {}
-            filesystem: {}
-            network: {}
-            processes: {}
-            process: {}
+            # load: {}
+            # memory: {}
+            # paging: {}
+            # disk: {}
+            # filesystem: {}
+            # network: {}
+            # processes: {}
+            # process: {}
     docker_stats:
         endpoint: unix:///var/run/docker.sock
         collection_interval: 5s
@@ -33,8 +33,6 @@ receivers:
     filelog:
         include:
             - /var/log/**/*.log*
-    fluentforward:
-        endpoint: 0.0.0.0:8006
 processors:
     resource/common:
         attributes:
@@ -76,7 +74,12 @@ exporters:
             enabled: true
             num_consumers: 100
             queue_size: 10000
+
+extensions:
+    health_check:
+
 service:
+    extensions: [ health_check ]
     pipelines:
         metrics:
             receivers:
@@ -84,30 +87,32 @@ service:
                 # - prometheus
             processors:
                 - resourcedetection
-                - resource/common
+                # - resource/common
                 - resource/metrics
             exporters:
                 - otlp/2
-        logs:
-            receivers:
-                - otlp
-                - fluentforward
-                - filelog
-            processors:
-                - resourcedetection
-                - resource/common
-                - resource/traces
-            exporters:
-                - otlp/2
-        traces:
-            receivers:
-                - otlp
-            processors:
-                - resourcedetection
-                - resource/common
-                - resource/logs
-            exporters:
-                - otlp/2
+        # logs:
+        #     receivers:
+        #         - otlp
+        #         - fluentforward
+        #         - filelog
+        #     processors:
+        #         - resourcedetection
+        #         - resource/common
+        #         - resource/traces
+        #     exporters:
+        #         - otlp/2
+        # traces:
+        #     receivers:
+        #         - otlp
+        #     processors:
+        #         - resourcedetection
+        #         - resource/common
+        #         - resource/logs
+        #     exporters:
+        #         - otlp/2
     telemetry:
         logs:
-            level: error
+            level: warn
+        metrics:
+            address: 0.0.0.0:8970
